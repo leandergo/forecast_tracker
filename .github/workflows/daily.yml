@@ -1,0 +1,34 @@
+name: Daily Forecast Logger
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 9:00 AM EDT (13:00 UTC)
+  workflow_dispatch:       # allow manual run from GitHub UI
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas openmeteo-requests requests-cache retry-requests
+
+      - name: Run forecast script
+        run: python forecast_logger.py
+
+      - name: Commit updated CSV
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add forecast_log.csv
+          git commit -m "Update forecast log $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git push
