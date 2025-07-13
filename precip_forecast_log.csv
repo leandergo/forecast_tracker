@@ -1,6 +1,6 @@
 date,actual,0_days_out,1_days_out,2_days_out,3_days_out,4_days_out,5_days_out,6_days_out,7_days_out,8_days_out,9_days_out,10_days_out,11_days_out,12_days_out,13_days_out,14_days_out,15_days_out
 2025-07-10,True,,,,,,,,,,,,,,,,
-2025-07-11,0.0,7.0,,,,,,,,,,,,,,,
+2025-07-11,False,7.0,,,,,,,,,,,,,,,
 2025-07-12,,1.0,5.0,,,,,,,,,,,,,,
 2025-07-13,,,2.0,3.0,,,,,,,,,,,,,
 2025-07-14,,,,21.0,24.0,,,,,,,,,,,,
