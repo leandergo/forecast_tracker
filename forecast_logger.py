@@ -90,6 +90,7 @@ def log_forecast():
 
         if delta == -1:
             column = "actual"
+            precip = row["precipitation_sum"]
         elif delta >= 0:
             column = f"{delta}_days_out"
         else:
@@ -104,7 +105,7 @@ def log_forecast():
     # Convert to DataFrame
     updates = pd.DataFrame(updated_rows)
     updates["date"] = pd.to_datetime(updates["date"])
-    updates['actual'] = (updates['actual'] > 0).where(updates['actual'].notna(), np.nan)
+    updates['actual'] = (updates['actual'] > 0.0).where(updates['actual'].notna(), np.nan)
     updates = updates.set_index("date")
 
     # If no file, create it
@@ -117,7 +118,7 @@ def log_forecast():
     existing = existing.set_index("date")
 
     combined = existing.combine_first(updates)  # preserve old
-    # combined.update(updates)                    # overwrite with new
+    combined.update(updates)                    # overwrite with new
 
     combined.sort_index().to_csv(FILEPATH)
 
