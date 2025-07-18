@@ -82,7 +82,7 @@ def get_daily_data():
 
         forecast_daily_dataframe = pd.DataFrame(data = forecast_daily_data)
 
-        df = pd.merge(forecast_daily_dataframe, archive_daily_dataframe, how="left", on="date")
+        df = pd.merge(forecast_daily_dataframe, archive_daily_dataframe, how="outer", on="date")
 
         dfs[city] = df
     
@@ -112,10 +112,12 @@ def log_forecast():
                 precip = row["precipitation_sum"]
             elif delta >= 0:
                 column = f"{delta}_days_out"
-            else:
+            elif delta > -3 and delta < 0:
                 # Skip forecasts from more than 1 day ago
                 column = "actual"
                 precip = np.nan
+            else:
+                continue
 
             updated_rows.append({
                 "date": forecast_date,
@@ -140,7 +142,11 @@ def log_forecast():
         combined = existing.combine_first(updates)  # preserve old
         combined.update(updates, overwrite=True)                    # overwrite with new
 
+        combined = combined[["actual", "0_days_out", "1_days_out", "2_days_out", "3_days_out", "4_days_out", "5_days_out", 
+                            "6_days_out", "7_days_out", "8_days_out", "9_days_out", "10_days_out", "11_days_out", 
+                            "12_days_out", "13_days_out", "14_days_out", "15_days_out"]]
         combined.sort_index().to_csv(f"{city}_{FILEPATH}")
 
 if __name__ == "__main__":
     log_forecast()
+    # print(get_daily_data())
