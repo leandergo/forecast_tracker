@@ -13,47 +13,78 @@ FILEPATH = "precip_forecast_log.csv"
 
 def get_daily_data():
 
+    today = datetime.date.today()
+    three_days_ago = str(today - datetime.timedelta(days=3))
     dfs = {}
+
     # Setup the Open-Meteo API client with cache and retry on error
-    cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
+    cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://api.open-meteo.com/v1/forecast"
-    params = {
+    archive_url = "https://archive-api.open-meteo.com/v1/archive"
+    archive_params = {
         "latitude": [42.3584, 40.7608, 47.6062],
         "longitude": [-71.0598, -111.8911, -122.3321],
-        "daily": ["precipitation_probability_max", "precipitation_sum"],
+        "start_date": three_days_ago,
+        "end_date": three_days_ago,
+        "daily": "precipitation_sum",
+        "timezone": "America/New_York"
+    }
+    archive_responses = openmeteo.weather_api(archive_url, params=archive_params)
+
+    forecast_url = "https://api.open-meteo.com/v1/forecast"
+    forecast_params = {
+        "latitude": [42.3584, 40.7608, 47.6062],
+        "longitude": [-71.0598, -111.8911, -122.3321],
+        "daily": "precipitation_probability_max",
         "timezone": "America/New_York",
-        "past_days": 1,
+        "past_days": 3,
         "forecast_days": 16
     }
-    responses = openmeteo.weather_api(url, params=params)
-
-    for i in range(len(responses)):
-
+    forecast_responses = openmeteo.weather_api(forecast_url, params=forecast_params)
+    for i in range(len(archive_responses)):
         city = ["boston", "slc", "seattle"][i]
-        response = responses[i]
 
+        ### ARCHIVE DATA
+        archive_response = archive_responses[i]
         # Process daily data. The order of variables needs to be the same as requested.
-        daily = response.Daily()
-        daily_precipitation_probability_max = daily.Variables(0).ValuesAsNumpy()
-        daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
+        archive_daily = archive_response.Daily()
+        daily_precipitation_sum = archive_daily.Variables(0).ValuesAsNumpy()
 
-        daily_data = {"date": pd.date_range(
-            start = pd.to_datetime(daily.Time(), unit = "s", utc = True),
-            end = pd.to_datetime(daily.TimeEnd(), unit = "s", utc = True),
-            freq = pd.Timedelta(seconds = daily.Interval()),
+        archive_daily_data = {"date": pd.date_range(
+            start = pd.to_datetime(archive_daily.Time(), unit = "s", utc = True),
+            end = pd.to_datetime(archive_daily.TimeEnd(), unit = "s", utc = True),
+            freq = pd.Timedelta(seconds = archive_daily.Interval()),
             inclusive = "left"
         )}
 
-        daily_data["precipitation_probability_max"] = daily_precipitation_probability_max
-        daily_data["precipitation_sum"] = daily_precipitation_sum
+        archive_daily_data["precipitation_sum"] = daily_precipitation_sum
+        archive_daily_dataframe = pd.DataFrame(data = archive_daily_data)
 
-        daily_dataframe = pd.DataFrame(data = daily_data)
-        dfs[city] = daily_dataframe
+
+        ### FORECAST DATA
+        # Process daily data. The order of variables needs to be the same as requested.
+        forecast_response = forecast_responses[i]
+        forecast_daily = forecast_response.Daily()
+        daily_precipitation_probability_max = forecast_daily.Variables(0).ValuesAsNumpy()
+
+        forecast_daily_data = {"date": pd.date_range(
+            start = pd.to_datetime(forecast_daily.Time(), unit = "s", utc = True),
+            end = pd.to_datetime(forecast_daily.TimeEnd(), unit = "s", utc = True),
+            freq = pd.Timedelta(seconds = forecast_daily.Interval()),
+            inclusive = "left"
+        )}
+
+        forecast_daily_data["precipitation_probability_max"] = daily_precipitation_probability_max
+
+        forecast_daily_dataframe = pd.DataFrame(data = forecast_daily_data)
+
+        df = pd.merge(forecast_daily_dataframe, archive_daily_dataframe, how="left", on="date")
+
+        dfs[city] = df
     
     return dfs
 
@@ -76,14 +107,15 @@ def log_forecast():
             # Determine what kind of column this is
             delta = (forecast_date - today).days
 
-            if delta == -1:
+            if delta == -3:
                 column = "actual"
                 precip = row["precipitation_sum"]
             elif delta >= 0:
                 column = f"{delta}_days_out"
             else:
                 # Skip forecasts from more than 1 day ago
-                continue
+                column = "actual"
+                precip = np.nan
 
             updated_rows.append({
                 "date": forecast_date,
@@ -93,7 +125,7 @@ def log_forecast():
         # Convert to DataFrame
         updates = pd.DataFrame(updated_rows)
         updates["date"] = pd.to_datetime(updates["date"])
-        updates['actual'] = (updates['actual'] > 0.0).where(updates['actual'].notna(), np.nan)
+        updates['actual'] = (updates['actual'] > 0.1).where(updates['actual'].notna(), np.nan)
         updates = updates.set_index("date")
 
         # If no file, create it
@@ -106,7 +138,7 @@ def log_forecast():
         existing = existing.set_index("date")
 
         combined = existing.combine_first(updates)  # preserve old
-        combined.update(updates)                    # overwrite with new
+        combined.update(updates, overwrite=True)                    # overwrite with new
 
         combined.sort_index().to_csv(f"{city}_{FILEPATH}")
 
