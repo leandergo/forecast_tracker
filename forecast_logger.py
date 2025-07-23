@@ -35,17 +35,35 @@ def get_daily_data():
     }
     archive_responses = openmeteo.weather_api(archive_url, params=archive_params)
 
-    forecast_url = "https://api.open-meteo.com/v1/forecast"
-    forecast_params = {
-        "latitude": [42.3584, 40.7608, 47.6062],
-        "longitude": [-71.0598, -111.8911, -122.3321],
-        "daily": "precipitation_probability_max",
-        "timezone": "America/New_York",
-        "past_days": 3,
-        "forecast_days": 16
-    }
-    forecast_responses = openmeteo.weather_api(forecast_url, params=forecast_params)
-    for i in range(len(archive_responses)):
+    # forecast_url = "https://api.open-meteo.com/v1/forecast"
+    # forecast_params = {
+    #     "latitude": [42.3584, 40.7608, 47.6062],
+    #     "longitude": [-71.0598, -111.8911, -122.3321],
+    #     "daily": "precipitation_probability_max",
+    #     "timezone": "America/New_York",
+    #     "past_days": 3,
+    #     "forecast_days": 16
+    # }
+    # forecast_responses = openmeteo.weather_api(forecast_url, params=forecast_params)
+    latitudes = [42.3584, 40.7608, 47.6062]
+    longitudes = [-71.0598, -111.8911, -122.3321]
+    forecast_responses = []
+    for i in range(3):
+        forecast_url = "https://api.open-meteo.com/v1/forecast"
+        forecast_params = {
+            "latitude": latitudes[i],
+            "longitude": longitudes[i],
+            "daily": "precipitation_probability_max",
+            "timezone": "America/New_York",
+            "past_days": 3,
+            "forecast_days": 16
+        }
+        forecast_response = openmeteo.weather_api(forecast_url, params=forecast_params)
+
+        forecast_responses += forecast_response
+
+
+    for i in range(3):
         city = ["boston", "slc", "seattle"][i]
 
         ### ARCHIVE DATA
@@ -130,18 +148,19 @@ def log_forecast():
         updates['actual'] = (updates['actual'] > 0.1).where(updates['actual'].notna(), np.nan)
         updates = updates.set_index("date")
 
-        # If no file, create it
-        if not os.path.exists(f"{city}_{FILEPATH}"):
-            updates.sort_index().to_csv(f"{city}_{FILEPATH}")
-            continue
-
+        # # If no file, create it
+        # if not os.path.exists(f"{city}_{FILEPATH}"):
+        #     updates.sort_index().to_csv(f"{city}_{FILEPATH}")
+        #     continue
+        
         # Load and merge
         existing = pd.read_csv(f"{city}_{FILEPATH}", parse_dates=["date"])
         existing = existing.set_index("date")
 
+        import pdb; pdb.set_trace()
         combined = existing.combine_first(updates)  # preserve old
         combined.update(updates, overwrite=True)                    # overwrite with new
-
+        import pdb; pdb.set_trace()
         combined = combined[["actual", "0_days_out", "1_days_out", "2_days_out", "3_days_out", "4_days_out", "5_days_out", 
                             "6_days_out", "7_days_out", "8_days_out", "9_days_out", "10_days_out", "11_days_out", 
                             "12_days_out", "13_days_out", "14_days_out", "15_days_out"]]
