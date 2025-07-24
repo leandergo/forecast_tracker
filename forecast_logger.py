@@ -157,10 +157,8 @@ def log_forecast():
         existing = pd.read_csv(f"{city}_{FILEPATH}", parse_dates=["date"])
         existing = existing.set_index("date")
 
-        import pdb; pdb.set_trace()
         combined = existing.combine_first(updates)  # preserve old
         combined.update(updates, overwrite=True)                    # overwrite with new
-        import pdb; pdb.set_trace()
         combined = combined[["actual", "0_days_out", "1_days_out", "2_days_out", "3_days_out", "4_days_out", "5_days_out", 
                             "6_days_out", "7_days_out", "8_days_out", "9_days_out", "10_days_out", "11_days_out", 
                             "12_days_out", "13_days_out", "14_days_out", "15_days_out"]]
