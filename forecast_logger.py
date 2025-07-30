@@ -160,5 +160,5 @@ def log_forecast():
         combined.sort_index().to_csv(f"{city}_{FILEPATH}")
 
 if __name__ == "__main__":
-    # log_forecast()
-    print(get_daily_data())
+    log_forecast()
+    # print(get_daily_data())
