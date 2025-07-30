@@ -15,6 +15,7 @@ def get_daily_data():
 
     today = datetime.date.today()
     three_days_ago = str(today - datetime.timedelta(days=4))
+    fifteen_days_from_now = str(today + datetime.timedelta(days=15))
     dfs = {}
     latitudes = [42.3584, 40.7608, 47.6062]
     longitudes = [-71.0598, -111.8911, -122.3321]
@@ -50,8 +51,8 @@ def get_daily_data():
             "longitude": longitudes[i],
             "daily": "precipitation_probability_max",
             "timezone": "America/New_York",
-            "past_days": 3,
-            "forecast_days": 16
+            "start_date": three_days_ago,
+            "end_date": fifteen_days_from_now
         }
         forecast_response = openmeteo.weather_api(forecast_url, params=forecast_params)
 
