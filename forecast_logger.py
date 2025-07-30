@@ -14,8 +14,10 @@ FILEPATH = "precip_forecast_log.csv"
 def get_daily_data():
 
     today = datetime.date.today()
-    three_days_ago = str(today - datetime.timedelta(days=3))
+    three_days_ago = str(today - datetime.timedelta(days=4))
     dfs = {}
+    latitudes = [42.3584, 40.7608, 47.6062]
+    longitudes = [-71.0598, -111.8911, -122.3321]
 
     # Setup the Open-Meteo API client with cache and retry on error
     cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
@@ -24,29 +26,22 @@ def get_daily_data():
 
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
-    archive_url = "https://archive-api.open-meteo.com/v1/archive"
-    archive_params = {
-        "latitude": [42.3584, 40.7608, 47.6062],
-        "longitude": [-71.0598, -111.8911, -122.3321],
-        "start_date": three_days_ago,
-        "end_date": three_days_ago,
-        "daily": "precipitation_sum",
-        "timezone": "America/New_York"
-    }
-    archive_responses = openmeteo.weather_api(archive_url, params=archive_params)
+    archive_responses = []
+    for i in range(3):
+        archive_url = "https://archive-api.open-meteo.com/v1/archive"
+        archive_params = {
+            "latitude": latitudes[i],
+            "longitude": longitudes[i],
+            "start_date": three_days_ago,
+            "end_date": three_days_ago,
+            "daily": "precipitation_sum",
+            "timezone": "America/New_York"
+        }
 
-    # forecast_url = "https://api.open-meteo.com/v1/forecast"
-    # forecast_params = {
-    #     "latitude": [42.3584, 40.7608, 47.6062],
-    #     "longitude": [-71.0598, -111.8911, -122.3321],
-    #     "daily": "precipitation_probability_max",
-    #     "timezone": "America/New_York",
-    #     "past_days": 3,
-    #     "forecast_days": 16
-    # }
-    # forecast_responses = openmeteo.weather_api(forecast_url, params=forecast_params)
-    latitudes = [42.3584, 40.7608, 47.6062]
-    longitudes = [-71.0598, -111.8911, -122.3321]
+        archive_response = openmeteo.weather_api(archive_url, params=archive_params)
+
+        archive_responses += archive_response
+
     forecast_responses = []
     for i in range(3):
         forecast_url = "https://api.open-meteo.com/v1/forecast"
@@ -165,5 +160,5 @@ def log_forecast():
         combined.sort_index().to_csv(f"{city}_{FILEPATH}")
 
 if __name__ == "__main__":
-    log_forecast()
-    # print(get_daily_data())
+    # log_forecast()
+    print(get_daily_data())
