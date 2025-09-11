@@ -22,8 +22,11 @@ jobs:
         run: |
           pip install pandas openmeteo-requests requests-cache retry-requests
 
-      - name: Run forecast script
+      - name: Run open-meteo forecast script
         run: python forecast_logger.py
+
+      - name: Run NWS forecast script
+        run: python api_call.py
 
       - name: Commit updated CSV
         run: |
@@ -32,5 +35,8 @@ jobs:
           git add boston_precip_forecast_log.csv
           git add slc_precip_forecast_log.csv
           git add seattle_precip_forecast_log.csv
+          git add boston_nws_forecast_log.csv
+          git add slc_nws_forecast_log.csv
+          git add seattle_nws_forecast_log.csv
           git commit -m "Update forecast log $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push
