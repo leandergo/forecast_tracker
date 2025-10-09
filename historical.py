@@ -97,7 +97,7 @@ def update_csv():
             if i == 0:
                 df = df[cols[:8]]
             else:
-                df = df[[cols]]
+                df = df[cols]
 
             df.sort_index().to_csv(FILEPATH)
 
