@@ -86,7 +86,7 @@ def update_csv():
             value = value[value.index >= start_date]
 
             # Combine dataframes
-            df['actual'] = np.nan
+            # df['actual'] = np.nan
             df = df.combine_first(value)
 
             # Get columns into the right order
