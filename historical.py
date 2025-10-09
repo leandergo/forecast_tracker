@@ -90,8 +90,14 @@ def update_csv():
             df = df.combine_first(value)
 
             # Get columns into the right order
-            col = 'actual'
-            df = df[[col] + [c for c in df.columns if c != col]]
+            cols = ["actual", "0_days_out", "1_days_out", "2_days_out", "3_days_out", "4_days_out", "5_days_out", 
+                            "6_days_out", "7_days_out", "8_days_out", "9_days_out", "10_days_out", "11_days_out", 
+                            "12_days_out", "13_days_out", "14_days_out", "15_days_out"]
+            
+            if i == 0:
+                df = df[[cols][:8]]
+            else:
+                df = df[[cols]]
 
             df.sort_index().to_csv(FILEPATH)
 
