@@ -95,7 +95,7 @@ def update_csv():
                             "12_days_out", "13_days_out", "14_days_out", "15_days_out"]
             
             if i == 0:
-                df = df[[cols][:8]]
+                df = df[cols[:8]]
             else:
                 df = df[[cols]]
 
