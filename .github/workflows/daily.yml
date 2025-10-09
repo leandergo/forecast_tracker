@@ -23,10 +23,10 @@ jobs:
           pip install pandas numpy openmeteo-requests requests-cache retry-requests
 
       - name: Run open-meteo forecast script
-        run: python forecast_logger.py
+        run: python meteo_forecast_logger.py
 
       - name: Run NWS forecast script
-        run: python api_call.py
+        run: python nws_forecast_logger.py
       
       - name: Run historical data script
         run: python historical.py
