@@ -3,9 +3,13 @@ import openmeteo_requests
 import pandas as pd
 import datetime
 import numpy as np
+import os
 
 import requests_cache
 from retry_requests import retry
+
+# Get the path to the repo root
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 def get_historical_dfs():
     # Setup the Open-Meteo API client with cache and retry on error
@@ -72,11 +76,13 @@ def update_csv():
             if i == 0:
                 # Read in other csv (NWS)
                 FILEPATH = f"{city}_nws_forecast_log.csv"
-                df = pd.read_csv(FILEPATH, parse_dates=["date"])
+                csv_path = os.path.join(repo_root, "nws_data", f"{city}_{FILEPATH}")
+                df = pd.read_csv(csv_path, parse_dates=["date"])
             else:
                 # Read in other csv (Open-Meteo)
                 FILEPATH = f"{city}_precip_forecast_log.csv"
-                df = pd.read_csv(FILEPATH, parse_dates=["date"])
+                csv_path = os.path.join(repo_root, "meteo_data", f"{city}_{FILEPATH}")
+                df = pd.read_csv(csv_path, parse_dates=["date"])
 
 
             df = df.set_index('date')

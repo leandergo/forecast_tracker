@@ -8,6 +8,9 @@ import os
 import datetime
 
 
+# Get the path to the repo root
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 # CSV file to log data
 FILEPATH = "precip_forecast_log.csv"
 
@@ -149,8 +152,11 @@ def log_forecast():
         #     updates.sort_index().to_csv(f"{city}_{FILEPATH}")
         #     continue
         
+        # Build the path to the CSV
+        csv_path = os.path.join(repo_root, "meteo_data", f"{city}_{FILEPATH}")
+
         # Load and merge
-        existing = pd.read_csv(f"{city}_{FILEPATH}", parse_dates=["date"])
+        existing = pd.read_csv(csv_path, parse_dates=["date"])
         existing = existing.set_index("date")
 
         combined = existing.combine_first(updates)  # preserve old

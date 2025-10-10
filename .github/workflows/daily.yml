@@ -23,23 +23,23 @@ jobs:
           pip install pandas numpy openmeteo-requests requests-cache retry-requests
 
       - name: Run open-meteo forecast script
-        run: python meteo_forecast_logger.py
+        run: python scripts/meteo_forecast_logger.py
 
       - name: Run NWS forecast script
-        run: python nws_forecast_logger.py
+        run: python scripts/nws_forecast_logger.py
       
       - name: Run historical data script
-        run: python historical.py
+        run: python scripts/historical.py
 
       - name: Commit updated CSV
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add boston_precip_forecast_log.csv
-          git add slc_precip_forecast_log.csv
-          git add seattle_precip_forecast_log.csv
-          git add boston_nws_forecast_log.csv
-          git add slc_nws_forecast_log.csv
-          git add seattle_nws_forecast_log.csv
+          git add meteo_data/boston_precip_forecast_log.csv
+          git add meteo_data/slc_precip_forecast_log.csv
+          git add meteo_data/seattle_precip_forecast_log.csv
+          git add nws_data/boston_nws_forecast_log.csv
+          git add nws_data/slc_nws_forecast_log.csv
+          git add nws_data/seattle_nws_forecast_log.csv
           git commit -m "Update forecast log $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push
