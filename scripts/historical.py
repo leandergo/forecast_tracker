@@ -76,12 +76,12 @@ def update_csv():
             if i == 0:
                 # Read in other csv (NWS)
                 FILEPATH = f"{city}_nws_forecast_log.csv"
-                csv_path = os.path.join(repo_root, "nws_data", f"{city}_{FILEPATH}")
+                csv_path = os.path.join("nws_data", f"{city}_{FILEPATH}")
                 df = pd.read_csv(csv_path, parse_dates=["date"])
             else:
                 # Read in other csv (Open-Meteo)
                 FILEPATH = f"{city}_precip_forecast_log.csv"
-                csv_path = os.path.join(repo_root, "meteo_data", f"{city}_{FILEPATH}")
+                csv_path = os.path.join("meteo_data", f"{city}_{FILEPATH}")
                 df = pd.read_csv(csv_path, parse_dates=["date"])
 
 

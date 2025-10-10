@@ -153,7 +153,7 @@ def log_forecast():
         #     continue
         
         # Build the path to the CSV
-        csv_path = os.path.join(repo_root, "meteo_data", f"{city}_{FILEPATH}")
+        csv_path = os.path.join("meteo_data", f"{city}_{FILEPATH}")
 
         # Load and merge
         existing = pd.read_csv(csv_path, parse_dates=["date"])

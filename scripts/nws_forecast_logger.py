@@ -98,7 +98,7 @@ def nws_log_forecast():
             
         # else:
         # Build the path to the CSV
-        csv_path = os.path.join(repo_root, "nws_data", f"{city}_{FILEPATH}")
+        csv_path = os.path.join("nws_data", f"{city}_{FILEPATH}")
 
         # Load and merge
         existing = pd.read_csv(csv_path, parse_dates=["date"])
