@@ -164,7 +164,7 @@ def log_forecast():
         combined = combined[["actual", "0_days_out", "1_days_out", "2_days_out", "3_days_out", "4_days_out", "5_days_out", 
                             "6_days_out", "7_days_out", "8_days_out", "9_days_out", "10_days_out", "11_days_out", 
                             "12_days_out", "13_days_out", "14_days_out", "15_days_out"]]
-        combined.sort_index().to_csv(f"{city}_{FILEPATH}")
+        combined.sort_index().to_csv(csv_path)
 
 if __name__ == "__main__":
     log_forecast()

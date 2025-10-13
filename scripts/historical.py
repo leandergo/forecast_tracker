@@ -105,7 +105,7 @@ def update_csv():
             else:
                 df = df[cols]
 
-            df.sort_index().to_csv(FILEPATH)
+            df.sort_index().to_csv(csv_path)
 
 
 
